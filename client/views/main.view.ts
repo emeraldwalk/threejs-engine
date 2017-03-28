@@ -1,39 +1,127 @@
 import * as THREE from 'three';
 import { BaseView } from './base.view';
+import { TileMapService } from '../services/tilemap.service';
+import { registerMouseIntersectionHandler } from '../services/mouse_intersection.service';
 
 let mainViewElement: Element = document.getElementsByClassName('main-view')[0];
 let view = new BaseView(mainViewElement);
 
-view.camera.position.set(mainViewElement.clientHeight, mainViewElement.clientHeight / 2, mainViewElement.clientHeight);
+let tileSize = 16;
+
+let height = tileSize * 10; //mainViewElement.clientHeight
+
+view.camera.position.set(
+	height,
+	height / 2,
+	height);
+
 view.camera.lookAt(view.scene.position);
 
-// import * as THREE_ORBIT_CONTROLS from 'three-orbit-controls';
-// import { RendererService } from '../services/renderer.service';
+let texture = new THREE.TextureLoader().load('assets/zelda-tiles.png', texture => {
+	let tileSet = new TileMapService({
+		tileMapWidth: texture.image.width,
+		tileMapHeight: texture.image.height,
+		tileSize
+	});
 
-// let mainViewElement: Element = document.getElementsByClassName('main-view')[0];
+	let squareShape = new THREE.Shape([
+		new THREE.Vector2(0, 0),
+		new THREE.Vector2(tileSize, 0),
+		new THREE.Vector2(tileSize, tileSize),
+		new THREE.Vector2(0, tileSize)
+	]);
+	let squareGeo = new THREE.ShapeGeometry(squareShape);
+	squareGeo.rotateX(-90 * Math.PI / 180);
 
-// let renderer = new RendererService({
-// 	width: mainViewElement.clientWidth,
-// 	height: mainViewElement.clientHeight,
-// 	element: mainViewElement
-// });
+	let squareMat = new THREE.MeshBasicMaterial({
+		//color: 0xFF0000,
+		map: texture,
+		side: THREE.DoubleSide
+	});
 
-// let scene: THREE.Scene = new THREE.Scene();
+	let tileMap = [
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	];
 
-// let axis = new THREE.AxisHelper(100);
-// scene.add(axis);
+	let tiles: Array<{ x: number, y: number, i: number }> = [];
+	let cols = tileMap[0].length;
+	let rows = tileMap.length;
+	for (let y = 0; y < rows; ++y) {
+		for (let x = 0; x < cols; ++x) {
+			tiles.push({
+				x: (x - cols / 2) * tileSize,
+				y: ((y - rows / 2) + 1) * tileSize,
+				i: tileMap[x][y]
+			});
+		}
+	}
 
-// let perCamera = new THREE.PerspectiveCamera(
-// 	75,
-// 	mainViewElement.clientWidth / mainViewElement.clientHeight,
-// 	1,
-// 	1000);
+	let intersectionCandidates = [];
 
-// perCamera.position.set(mainViewElement.clientHeight, mainViewElement.clientHeight / 2, mainViewElement.clientHeight);
-// perCamera.lookAt(scene.position);
+	let tileIndex = 0;
 
-// let OrbitControls = THREE_ORBIT_CONTROLS(THREE);
+	registerMouseIntersectionHandler(
+		view.renderer.domElement,
+		view.camera,
+		intersectionCandidates,
+		(intersections) => {
+			if (intersections[0]) {
+				let tile = tileSet.tiles[++tileIndex];
+				let mesh: THREE.Mesh = <any>intersections[0].object;
+				let geoClone = mesh
+					.geometry
+					.clone() as THREE.Geometry;
 
+				TileMapService.mapUVtoGeometry(
+					geoClone,
+					tile);
 
-// renderer.render(scene, perCamera);
-// new OrbitControls(perCamera, mainViewElement);
+				let meshClone = new THREE.Mesh(
+					geoClone,
+					squareMat);
+
+				meshClone.position.x = mesh.position.x;
+				meshClone.position.z = mesh.position.z;
+
+				view.scene.remove(mesh);
+				view.scene.add(meshClone);
+
+				let index = intersectionCandidates.indexOf(mesh);
+				if (index > -1) {
+					intersectionCandidates.splice(index, 1);
+				}
+				intersectionCandidates.push(meshClone);
+			}
+		});
+
+	let mapObject = new THREE.Object3D();
+	view.scene.add(mapObject);
+
+	for (let tile of tiles) {
+		let geoClone = squareGeo.clone();
+
+		TileMapService.mapUVtoGeometry(
+			geoClone,
+			tileSet.tiles[tile.i]);
+
+		let squareMesh = new THREE.Mesh(
+			geoClone,
+			squareMat);
+
+		squareMesh.position.x = tile.x;
+		squareMesh.position.z = tile.y;
+
+		mapObject.add(squareMesh);
+
+		intersectionCandidates.push(squareMesh);
+	}
+});

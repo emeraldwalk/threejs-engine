@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { BaseView } from './base.view';
-import { TileSetService } from '../services/tileset.service';
+import { TileMapService } from '../services/tilemap.service';
+import { registerMouseIntersectionHandler } from '../services/mouse_intersection.service';
 
 let viewElement: Element = document.getElementsByClassName('controls-view')[0];
 
@@ -38,70 +39,61 @@ let texture = new THREE.TextureLoader().load('assets/zelda-tiles.png', texture =
 		side: THREE.DoubleSide
 	});
 
-	let tileSet = new TileSetService({
+	let tileSet = new TileMapService({
 		tileMapWidth: texture.image.width,
 		tileMapHeight: texture.image.height,
 		tileSize: 16
 	});
 
 	/**
-	 * Click events
+	 * Handle clicks for tile selection.
 	 */
-	let raycaster = new THREE.Raycaster();
-	let mouse = new THREE.Vector2();
-	let intersectObjects: Array<THREE.Object3D> = [];
+	let intersectionCandidates: Array<THREE.Object3D> = [];
 
 	let selectedSquareMesh: THREE.Mesh;
+	function updateSelectedSquare(intersections: Array<THREE.Intersection>) {
+		let i = intersectionCandidates.indexOf(intersections[0].object);
+		let tile = tileSet.tiles[i];
 
-	view.renderer.domElement.addEventListener('mousedown', function (event: MouseEvent) {
-		mouse.x = (event.clientX - this.offsetLeft) / this.width * 2 - 1;
-		mouse.y = -(event.clientY - this.offsetTop) / this.height * 2 + 1;
+		let geoClone = TileMapService.mapUVtoGeometry(
+			squareGeo.clone(),
+			tile);
 
-		raycaster.setFromCamera(mouse, orthoCamera);
+		selectedSquareMesh = new THREE.Mesh(
+			geoClone,
+			squareMat);
 
-		let intersections = raycaster.intersectObjects(intersectObjects, true);
-		if (intersections.length > 0) {
-			let i = intersectObjects.indexOf(intersections[0].object);
+		selectedSquareMesh.position.set(0, -36, 0);
+		selectedSquareMesh.scale.set(2, 2, 2);
 
-			if (selectedSquareMesh) {
-				view.scene.remove(selectedSquareMesh);
-			}
+		view.scene.remove(selectedSquareMesh);
+		view.scene.add(selectedSquareMesh);
+	}
 
-			let tile = tileSet.tiles[i];
+	registerMouseIntersectionHandler(
+		view.renderer.domElement,
+		orthoCamera,
+		intersectionCandidates,
+		(intersections) => {
+			updateSelectedSquare(intersections);
+		});
 
-			let geoClone = squareGeo.clone();
-			geoClone.faceVertexUvs[0] = [];
-			geoClone.faceVertexUvs[0][0] = [tile[3], tile[0], tile[1]];
-			geoClone.faceVertexUvs[0][1] = [tile[1], tile[2], tile[3]];
-
-			selectedSquareMesh = new THREE.Mesh(
-				geoClone,
-				squareMat);
-
-			selectedSquareMesh.position.set(0, -36, 0);
-			selectedSquareMesh.scale.set(2, 2, 2);
-			view.scene.add(selectedSquareMesh);
-		}
-	});
-
-
-
+	/**
+	 * Render our tiles.
+	 */
 	let x = 0;
 	let y = 0;
 	let col = cameraWidth;
 
-	for (let tile of tileSet.tiles) {
-		let geoClone = squareGeo.clone();
-		geoClone.faceVertexUvs[0] = [];
-		geoClone.faceVertexUvs[0][0] = [tile[3], tile[0], tile[1]];
-		geoClone.faceVertexUvs[0][1] = [tile[1], tile[2], tile[3]];
+	let squareGeos = tileSet.createUVGeometries(squareGeo);
 
+	for (let geoClone of squareGeos) {
 		let squareMesh = new THREE.Mesh(geoClone, squareMat);
 		squareMesh.position.setX(x);
 		squareMesh.position.setY(y - 1);
 		view.scene.add(squareMesh);
 
-		intersectObjects.push(squareMesh);
+		intersectionCandidates.push(squareMesh);
 
 		if (x % col === col - 1) {
 			x = 0;
