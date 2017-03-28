@@ -1,7 +1,10 @@
 import * as THREE from 'three';
+import { state } from '../services/state.service';
 import { BaseView } from './base.view';
 import { TileMapService } from '../services/tilemap.service';
 import { registerMouseIntersectionHandler } from '../services/mouse_intersection.service';
+
+import { map as tileMap } from '../map2';
 
 let mainViewElement: Element = document.getElementsByClassName('main-view')[0];
 let view = new BaseView(mainViewElement);
@@ -39,18 +42,18 @@ let texture = new THREE.TextureLoader().load('assets/zelda-tiles.png', texture =
 		side: THREE.DoubleSide
 	});
 
-	let tileMap = [
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-	];
+	// let tileMap = [
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+	// 	[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	// ];
 
 	let tiles: Array<{ x: number, y: number, i: number }> = [];
 	let cols = tileMap[0].length;
@@ -60,22 +63,20 @@ let texture = new THREE.TextureLoader().load('assets/zelda-tiles.png', texture =
 			tiles.push({
 				x: (x - cols / 2) * tileSize,
 				y: ((y - rows / 2) + 1) * tileSize,
-				i: tileMap[x][y]
+				i: tileMap[y][x]
 			});
 		}
 	}
 
 	let intersectionCandidates = [];
 
-	let tileIndex = 0;
-
 	registerMouseIntersectionHandler(
 		view.renderer.domElement,
 		view.camera,
 		intersectionCandidates,
 		(intersections) => {
-			if (intersections[0]) {
-				let tile = tileSet.tiles[++tileIndex];
+			if (intersections[0] && state.selectedTileIndex !== undefined) {
+				let tile = tileSet.tiles[state.selectedTileIndex];
 				let mesh: THREE.Mesh = <any>intersections[0].object;
 				let geoClone = mesh
 					.geometry
@@ -106,8 +107,10 @@ let texture = new THREE.TextureLoader().load('assets/zelda-tiles.png', texture =
 	let mapObject = new THREE.Object3D();
 	view.scene.add(mapObject);
 
+	let geoClones = [];
+
 	for (let tile of tiles) {
-		let geoClone = squareGeo.clone();
+		let geoClone = geoClones[tile.i] = geoClones[tile.i] || squareGeo.clone();
 
 		TileMapService.mapUVtoGeometry(
 			geoClone,

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { state } from '../services/state.service';
 import { BaseView } from './base.view';
 import { TileMapService } from '../services/tilemap.service';
 import { registerMouseIntersectionHandler } from '../services/mouse_intersection.service';
@@ -54,6 +55,7 @@ let texture = new THREE.TextureLoader().load('assets/zelda-tiles.png', texture =
 	function updateSelectedSquare(intersections: Array<THREE.Intersection>) {
 		let i = intersectionCandidates.indexOf(intersections[0].object);
 		let tile = tileSet.tiles[i];
+		state.selectedTileIndex = i;
 
 		let geoClone = TileMapService.mapUVtoGeometry(
 			squareGeo.clone(),

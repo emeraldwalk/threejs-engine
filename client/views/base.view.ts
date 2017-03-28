@@ -23,7 +23,7 @@ export class BaseView {
 			75,
 			element.clientWidth / element.clientHeight,
 			1,
-			1000);
+			10000);
 
 		let OrbitControls = THREE_ORBIT_CONTROLS(THREE);
 
