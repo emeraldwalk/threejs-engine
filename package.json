@@ -7,7 +7,7 @@
   "scripts": {
     "webpack": "webpack",
     "webpack-dev-server": "webpack-dev-server",
-    "serve": "webpack-dev-server"
+    "serve": "webpack-dev-server --content-base client"
   },
   "keywords": [],
   "author": "",

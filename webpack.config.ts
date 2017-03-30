@@ -4,17 +4,17 @@ import * as HtmlWebpackPlugin from 'html-webpack-plugin';
 
 const config: webpack.Configuration = {
 	entry: {
-		'dist/app': './client/app.ts',
-		'dist/vendor': ['three']
+		'build/app': './client/src/app.ts',
+		'build/vendor': ['three']
 	},
 	devtool: 'source-map',
 	resolve: {
 		extensions: ['.js', '.ts', '.css']
 	},
 	output: {
-		path: __dirname,// path.resolve(__dirname, 'dist'),
-		filename: '[name].js',
-		publicPath: '/' // need this for static assests to work
+		path: path.resolve(__dirname, 'client'),
+		filename: '[name].js'
+		//publicPath: '/' // need this for static assests to work
 	},
 	module: {
 		rules: [
@@ -34,11 +34,11 @@ const config: webpack.Configuration = {
 		 * and app == vendor.
 		 */
 		new webpack.optimize.CommonsChunkPlugin({
-			name: 'dist/vendor',
+			name: 'build/vendor',
 			minChunks: Infinity
 		}),
 		new HtmlWebpackPlugin({
-			template: path.resolve(__dirname, 'client/index.tpl.html'),
+			template: path.resolve(__dirname, 'client/src/index.tpl.html'),
 			inject: 'body'
 		})
 	]
