@@ -18,10 +18,10 @@ const config: webpack.Configuration = {
 	},
 	module: {
 		rules: [
-			{
-				test: /\.css$/,
-				use: ['style-loader', 'css-loader']
-			},
+			// {
+			// 	test: /\.css$/,
+			// 	use: ['style-loader', 'css-loader']
+			// },
 			{ test: /\.ts$/, use: 'awesome-typescript-loader' }
 		]
 	},
