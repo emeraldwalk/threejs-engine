@@ -12,11 +12,13 @@ export class BaseView {
 		element: Element,
 		options: {
 			camera?: THREE.Camera,
-			orbitControls?: boolean
+			orbitControls?: boolean,
+			width?: number,
+			height?: number
 		} = {}) {
 		let rendererService = new RendererService({
-			width: element.clientWidth,
-			height: element.clientHeight,
+			width: options.width || element.clientWidth,
+			height: options.height || element.clientHeight,
 			element: element
 		});
 

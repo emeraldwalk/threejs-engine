@@ -6,8 +6,11 @@ import { registerMouseIntersectionHandler } from '../services/mouse_intersection
 
 let viewElement: Element = document.getElementsByClassName('controls-view')[0];
 
-let aspectRatio = viewElement.clientWidth / viewElement.clientHeight;
-let cameraWidth = 32;
+let width = viewElement.clientWidth;
+let height = width * 16;
+
+let aspectRatio = width / height;
+let cameraWidth = 8;
 let cameraHeight = cameraWidth / aspectRatio;
 
 let orthoCamera = new THREE.OrthographicCamera(
@@ -20,7 +23,11 @@ let orthoCamera = new THREE.OrthographicCamera(
 
 let view = new BaseView(
 	viewElement,
-	{ camera: orthoCamera });
+	{
+		camera: orthoCamera,
+		width,
+		height
+	});
 
 let texture = new THREE.TextureLoader().load('/assets/zelda-tiles.png', texture => {
 	view.camera.position.setZ(1);
