@@ -4,15 +4,15 @@ import * as HtmlWebpackPlugin from 'html-webpack-plugin';
 
 const config: webpack.Configuration = {
 	entry: {
-		app: './client/app.ts',
-		vendor: ['three']
+		'dist/app': './client/app.ts',
+		'dist/vendor': ['three']
 	},
 	devtool: 'source-map',
 	resolve: {
 		extensions: ['.js', '.ts', '.css']
 	},
 	output: {
-		path: path.resolve(__dirname, 'dist'),
+		path: __dirname,// path.resolve(__dirname, 'dist'),
 		filename: '[name].js',
 		publicPath: '/' // need this for static assests to work
 	},
@@ -34,7 +34,7 @@ const config: webpack.Configuration = {
 		 * and app == vendor.
 		 */
 		new webpack.optimize.CommonsChunkPlugin({
-			name: 'vendor',
+			name: 'dist/vendor',
 			minChunks: Infinity
 		}),
 		new HtmlWebpackPlugin({

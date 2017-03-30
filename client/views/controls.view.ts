@@ -22,7 +22,7 @@ let view = new BaseView(
 	viewElement,
 	{ camera: orthoCamera });
 
-let texture = new THREE.TextureLoader().load('assets/zelda-tiles.png', texture => {
+let texture = new THREE.TextureLoader().load('/assets/zelda-tiles.png', texture => {
 	view.camera.position.setZ(1);
 	// view.camera.lookAt(view.scene.position);
 

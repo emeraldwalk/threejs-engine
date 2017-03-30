@@ -22,7 +22,7 @@ view.camera.position.set(
 
 view.camera.lookAt(view.scene.position);
 
-let texture = new THREE.TextureLoader().load('assets/zelda-tiles.png', texture => {
+let texture = new THREE.TextureLoader().load('/assets/zelda-tiles.png', texture => {
 	let tileSet = new TileMapService({
 		tileMapWidth: texture.image.width,
 		tileMapHeight: texture.image.height,
