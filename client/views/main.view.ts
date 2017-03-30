@@ -7,7 +7,9 @@ import { registerMouseIntersectionHandler } from '../services/mouse_intersection
 import { map as tileMap } from '../map2';
 
 let mainViewElement: Element = document.getElementsByClassName('main-view')[0];
-let view = new BaseView(mainViewElement);
+let view = new BaseView(mainViewElement, {
+	orbitControls: true
+});
 
 let tileSize = 16;
 

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import * as THREE_ORBIT_CONTROLS from 'three-orbit-controls';
+//require('three-first-person-controls')(THREE);
 import { RendererService } from '../services/renderer.service';
 
 export class BaseView {
@@ -7,7 +8,12 @@ export class BaseView {
 	private _scene: THREE.Scene;
 	private _camera: THREE.Camera;
 
-	constructor(element: Element, camera?: THREE.Camera) {
+	constructor(
+		element: Element,
+		options: {
+			camera?: THREE.Camera,
+			orbitControls?: boolean
+		} = {}) {
 		let rendererService = new RendererService({
 			width: element.clientWidth,
 			height: element.clientHeight,
@@ -19,7 +25,7 @@ export class BaseView {
 		let axis = new THREE.AxisHelper(100);
 		this._scene.add(axis);
 
-		this._camera = camera || new THREE.PerspectiveCamera(
+		this._camera = options.camera || new THREE.PerspectiveCamera(
 			75,
 			element.clientWidth / element.clientHeight,
 			1,
@@ -31,9 +37,15 @@ export class BaseView {
 			this._scene,
 			this._camera);
 
-		new OrbitControls(
-			this._camera,
-			element);
+		if(options.orbitControls) {
+			let controls = new OrbitControls(
+				this._camera,
+				element);
+		}
+
+		// new THREE.FirstPersonControls(
+		// 	this._camera,
+		// 	element as HTMLElement);
 	}
 
 	public get scene(): THREE.Scene {

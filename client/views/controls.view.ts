@@ -20,7 +20,7 @@ let orthoCamera = new THREE.OrthographicCamera(
 
 let view = new BaseView(
 	viewElement,
-	orthoCamera);
+	{ camera: orthoCamera });
 
 let texture = new THREE.TextureLoader().load('assets/zelda-tiles.png', texture => {
 	view.camera.position.setZ(1);
