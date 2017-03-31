@@ -120,8 +120,8 @@ var BaseView = (function () {
     function BaseView(element, options) {
         if (options === void 0) { options = {}; }
         var rendererService = new renderer_service_1.RendererService({
-            width: element.clientWidth,
-            height: element.clientHeight,
+            width: options.width || element.clientWidth,
+            height: options.height || element.clientHeight,
             element: element
         });
         this._scene = new THREE.Scene();
@@ -176,11 +176,17 @@ var base_view_1 = __webpack_require__(4);
 var tilemap_service_1 = __webpack_require__(3);
 var mouse_intersection_service_1 = __webpack_require__(1);
 var viewElement = document.getElementsByClassName('controls-view')[0];
-var aspectRatio = viewElement.clientWidth / viewElement.clientHeight;
-var cameraWidth = 32;
+var width = viewElement.clientWidth;
+var height = width * 16;
+var aspectRatio = width / height;
+var cameraWidth = 8;
 var cameraHeight = cameraWidth / aspectRatio;
 var orthoCamera = new THREE.OrthographicCamera(0, cameraWidth, 0, -cameraHeight, 1, 1000);
-var view = new base_view_1.BaseView(viewElement, { camera: orthoCamera });
+var view = new base_view_1.BaseView(viewElement, {
+    camera: orthoCamera,
+    width: width,
+    height: height
+});
 var texture = new THREE.TextureLoader().load('/assets/zelda-tiles.png', function (texture) {
     view.camera.position.setZ(1);
     // view.camera.lookAt(view.scene.position);
